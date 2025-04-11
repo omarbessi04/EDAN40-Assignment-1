@@ -1,6 +1,6 @@
 module Chatterbot where
 import Utilities
-import System.Random
+--import System.Random
 import Data.Char
 import Data.Maybe
 
@@ -163,22 +163,18 @@ substitute (Pattern elems) replacement = go elems
     go (Wildcard : xs) = replacement ++ go xs
 
 
-
-
-
-
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => Pattern a -> [a] -> Maybe [a]
 singleWildcardMatch (Pattern (Wildcard:ps)) (x:xs) =
   case match (Pattern ps) xs of
     Nothing -> Nothing
-    Just _ -> Just [x]
+    Just _  -> Just [x]
 
 longerWildcardMatch (Pattern (Wildcard:ps)) (x:xs) =
   case match (Pattern (alice:Wildcard:ps)) (x:xs) of
     Nothing -> Nothing
-    Just _ -> Just [x]
-  where alice = Item x
+    Just ys -> Just (x:ys)
+    where alice = Item x
 
 
 -- Tries to match two lists. If they match, the result consists of the sublist
@@ -186,22 +182,21 @@ longerWildcardMatch (Pattern (Wildcard:ps)) (x:xs) =
 match :: Eq a => Pattern a -> [a] -> Maybe [a]
 
 {- PART 1, either is empty-}
-match (Pattern []) [] = Just []
-match (Pattern []) (x:xs) = Nothing
-match (Pattern (x:xs)) [] = Nothing
+match (Pattern []) [] = Just [] --Both
+match (Pattern []) _ = Nothing --Empty Pattern
+match (Pattern (Wildcard:_)) [] = Nothing --Empty input w wildcard
+match (Pattern (_:_)) [] = Nothing --Empty input wo wildcard
 
 {- Part 2; Non-empty, no wildcard -}
-match (Pattern (x:xs)) (t:ts)
-  |x /= s = Nothing
-  |x == s = match (Pattern xs) ts 
-  where s = Item t
+match (Pattern (Item x:xs)) (t:ts)
+  |x /= t = Nothing
+  |x == t = match (Pattern xs) ts 
 
 {- Part 3; Wildcards.-}
-match (Pattern (Wildcard:xs)) (t:ts) = Utilities.orElse (singleWildcardMatch (Pattern (Wildcard:xs)) (t:ts)) (longerWildcardMatch (Pattern (Wildcard:xs)) (t:ts))
-
--- >>> match (mkPattern 'x' "2*x+3") "2*7+3"
--- Just "7"
-
+match (Pattern (Wildcard:ps)) xs =
+  Utilities.orElse
+    (singleWildcardMatch (Pattern (Wildcard:ps)) xs)
+    (longerWildcardMatch (Pattern (Wildcard:ps)) xs)
 
 -------------------------------------------------------
 -- Applying patterns transformations
@@ -211,10 +206,33 @@ match (Pattern (Wildcard:xs)) (t:ts) = Utilities.orElse (singleWildcardMatch (Pa
 matchAndTransform :: Eq a => ([a] -> [a]) -> Pattern a -> [a] -> Maybe [a]
 matchAndTransform transform pat = (mmap transform) . (match pat)
 
+
+{-frenchPresentation = (mkPattern '*' "My name is *",
+mkPattern '*' "Je m'appelle *")
+transformationApply id "My name is Zacharias"-}
+
 -- Applying a single pattern
 transformationApply :: Eq a => ([a] -> [a]) -> [a] -> (Pattern a, Template a) -> Maybe [a]
 {- TO BE WRITTEN -}
-transformationApply = undefined
+transformationApply given_func string (p,Pattern []) = Just []
+
+{-transformationApply given_func string (p,Pattern ((Item x):xs)) = Just (x:s)
+  where (Just s) = transformationApply given_func (given_func string) (p, Pattern xs-}
+
+transformationApply given_func string (p,Pattern ((Item x):xs)) 
+  | isNothing s0 = Nothing
+  | otherwise = Just (x:s1)
+  where 
+    s0 = transformationApply given_func (given_func string) (p, Pattern xs) 
+    (Just s1) = transformationApply given_func (given_func string) (p, Pattern xs) 
+
+transformationApply given_func string (p,Pattern (Wildcard:xs)) 
+  | isNothing (match p string) = Nothing
+  | otherwise = Just(replacement++s)
+  where
+    (Just s) = transformationApply given_func (given_func string) (p, Pattern xs)
+    Just replacement = match p string
+
 
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => ([a] -> [a]) -> [(Pattern a, Template a)] -> [a] -> Maybe [a]
