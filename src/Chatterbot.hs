@@ -57,13 +57,34 @@ makePair :: Rule -> IO (Pattern String, Template String)
   {- TO BE WRITTEN -}
 makePair = undefined
 
+{-rulesApply :: [(Pattern String, Template String)] -> Phrase -> Phrase
+rulesApply list sentence = 
+  case transformationsApply id list sentence of
+    Nothing -> ["ARGH!"]
+    _ -> reflect s
+    where Just s = transformationsApply id list sentence -}
+    
+
 rulesApply :: [(Pattern String, Template String)] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-rulesApply = undefined
+ -- 1. Match the phrase with a pattern.
+rulesApply list sentence = 
+ case transformationsApply id list sentence of
+  Nothing -> ["ARGH!"]
+  _ -> let cool_thing = s
+ where Just s = transformationsApply id list sentence
+
+ -- 2. Reflect the match.
+ reflect sentence
+ -- 3. Substitute the match in the target pattern.
 
 reflect :: Phrase -> Phrase
-{- TO BE WRITTEN -}
-reflect = undefined
+reflect = map (reflectWord reflections)
+
+reflectWord :: [(String, String)] -> String -> String
+reflectWord [] word = word
+reflectWord ((first_person, second_person):xs) word
+  |word == first_person = second_person
+  |otherwise = reflectWord xs word
 
 reflections =
   [ ("am",     "are"),
@@ -75,6 +96,7 @@ reflections =
     ("i'll",   "you will"),
     ("my",     "your"),
     ("me",     "you"),
+
     ("are",    "am"),
     ("you're", "i am"),
     ("you've", "i have"),
@@ -198,6 +220,9 @@ match (Pattern (Wildcard:ps)) xs =
     (singleWildcardMatch (Pattern (Wildcard:ps)) xs)
     (longerWildcardMatch (Pattern (Wildcard:ps)) xs)
 
+-- >>> match (mkPattern '*' "I hate *") "I hate bad waffles"
+-- Just "bad waffles"
+
 -------------------------------------------------------
 -- Applying patterns transformations
 --------------------------------------------------------
@@ -206,19 +231,12 @@ match (Pattern (Wildcard:ps)) xs =
 matchAndTransform :: Eq a => ([a] -> [a]) -> Pattern a -> [a] -> Maybe [a]
 matchAndTransform transform pat = (mmap transform) . (match pat)
 
-
-{-frenchPresentation = (mkPattern '*' "My name is *",
-mkPattern '*' "Je m'appelle *")
-transformationApply id "My name is Zacharias"-}
-
 -- Applying a single pattern
 transformationApply :: Eq a => ([a] -> [a]) -> [a] -> (Pattern a, Template a) -> Maybe [a]
-{- TO BE WRITTEN -}
+-- Empty pattern
 transformationApply given_func string (p,Pattern []) = Just []
 
-{-transformationApply given_func string (p,Pattern ((Item x):xs)) = Just (x:s)
-  where (Just s) = transformationApply given_func (given_func string) (p, Pattern xs-}
-
+-- Item
 transformationApply given_func string (p,Pattern ((Item x):xs)) 
   | isNothing s0 = Nothing
   | otherwise = Just (x:s1)
@@ -226,6 +244,7 @@ transformationApply given_func string (p,Pattern ((Item x):xs))
     s0 = transformationApply given_func (given_func string) (p, Pattern xs) 
     (Just s1) = transformationApply given_func (given_func string) (p, Pattern xs) 
 
+-- Wildcard    
 transformationApply given_func string (p,Pattern (Wildcard:xs)) 
   | isNothing (match p string) = Nothing
   | otherwise = Just(replacement++s)
@@ -236,5 +255,9 @@ transformationApply given_func string (p,Pattern (Wildcard:xs))
 
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => ([a] -> [a]) -> [(Pattern a, Template a)] -> [a] -> Maybe [a]
-{- TO BE WRITTEN -}
-transformationsApply = undefined
+transformationsApply string_func [] sentence = Nothing
+
+transformationsApply string_func ((p,t):xs) sentence =
+  case transformationApply string_func sentence (p, t) of
+    Just result -> Just result
+    Nothing     -> transformationsApply string_func xs sentence
