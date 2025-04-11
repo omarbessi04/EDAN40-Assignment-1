@@ -52,7 +52,9 @@ stateOfMind b =
 -- A rule maps a pattern to many answers, so we choose one
 -- at random, and that's our bot
 makePair :: Rule -> IO (Pattern String, Template String)
-{- TO BE WRITTEN -}
+{-makePair (Rule (pattern, list)) = (pattern, take 1 (drop r list))
+    where System.Random.getStdRandom(r, (0, length list))-}
+  {- TO BE WRITTEN -}
 makePair = undefined
 
 rulesApply :: [(Pattern String, Template String)] -> Phrase -> Phrase
@@ -108,8 +110,16 @@ ruleCompile = undefined
 -- If we choose one element that represents the wildcard
 -- mkPattern '*' "Hi *!" => [Item 'H', Item 'i', Wildcard, Item '!']
 mkPattern :: Eq a => a -> [a] -> Pattern a
-{- TO BE WRITTEN -}
-mkPattern = undefined
+mkPattern _ [] = Pattern []
+mkPattern checker (x:xs)
+  | x == checker = let (Pattern rest) = mkPattern checker xs
+    in Pattern (Wildcard : rest)
+  | otherwise    = let (Pattern rest) = mkPattern checker xs
+    in Pattern (Item x : rest)
+
+
+-- >>> mkPattern '*' "Hi *!"
+
 
 stringToPattern :: String -> String -> Pattern String
 stringToPattern wc = mkPattern wc . words
@@ -145,15 +155,17 @@ reductionsApply = undefined
 --------------------------------------------------------
 
 -- Replaces a wildcard in a template with the list given as the third argument
-substitute :: Eq a => Template a -> [a] -> [a]
-{- TO BE WRITTEN -}
-substitute = undefined
+substitute :: Template a -> [a] -> [a]
+substitute (Pattern elems) replacement = go elems
+  where
+    go [] = []
+    go (Item x : xs) = x : go xs
+    go (Wildcard : xs) = replacement ++ go xs
 
--- Tries to match two lists. If they match, the result consists of the sublist
--- bound to the wildcard in the pattern list.
-match :: Eq a => Pattern a -> [a] -> Maybe [a]
-{- TO BE WRITTEN -}
-match = undefined
+
+
+
+
 
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => Pattern a -> [a] -> Maybe [a]
@@ -161,9 +173,34 @@ singleWildcardMatch (Pattern (Wildcard:ps)) (x:xs) =
   case match (Pattern ps) xs of
     Nothing -> Nothing
     Just _ -> Just [x]
-{- TO BE WRITTEN -}
-longerWildcardMatch = undefined
 
+longerWildcardMatch (Pattern (Wildcard:ps)) (x:xs) =
+  case match (Pattern (alice:Wildcard:ps)) (x:xs) of
+    Nothing -> Nothing
+    Just _ -> Just [x]
+  where alice = Item x
+
+
+-- Tries to match two lists. If they match, the result consists of the sublist
+-- bound to the wildcard in the pattern list.
+match :: Eq a => Pattern a -> [a] -> Maybe [a]
+
+{- PART 1, either is empty-}
+match (Pattern []) [] = Just []
+match (Pattern []) (x:xs) = Nothing
+match (Pattern (x:xs)) [] = Nothing
+
+{- Part 2; Non-empty, no wildcard -}
+match (Pattern (x:xs)) (t:ts)
+  |x /= s = Nothing
+  |x == s = match (Pattern xs) ts 
+  where s = Item t
+
+{- Part 3; Wildcards.-}
+match (Pattern (Wildcard:xs)) (t:ts) = Utilities.orElse (singleWildcardMatch (Pattern (Wildcard:xs)) (t:ts)) (longerWildcardMatch (Pattern (Wildcard:xs)) (t:ts))
+
+-- >>> match (mkPattern 'x' "2*x+3") "2*7+3"
+-- Just "7"
 
 
 -------------------------------------------------------

@@ -42,12 +42,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\Assignment1\\.stack-work\\install\\724b212f\\bin"
-libdir     = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\Assignment1\\.stack-work\\install\\724b212f\\lib\\x86_64-windows-ghc-9.4.8\\n1-0.1.0.0-4P2upxWAlF93VQsvnpFyAx"
-dynlibdir  = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\Assignment1\\.stack-work\\install\\724b212f\\lib\\x86_64-windows-ghc-9.4.8"
-datadir    = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\Assignment1\\.stack-work\\install\\724b212f\\share\\x86_64-windows-ghc-9.4.8\\n1-0.1.0.0"
-libexecdir = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\Assignment1\\.stack-work\\install\\724b212f\\libexec\\x86_64-windows-ghc-9.4.8\\n1-0.1.0.0"
-sysconfdir = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\Assignment1\\.stack-work\\install\\724b212f\\etc"
+bindir     = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\EDAN40-Assignment-1\\.stack-work\\install\\724b212f\\bin"
+libdir     = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\EDAN40-Assignment-1\\.stack-work\\install\\724b212f\\lib\\x86_64-windows-ghc-9.4.8\\n1-0.1.0.0-4P2upxWAlF93VQsvnpFyAx"
+dynlibdir  = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\EDAN40-Assignment-1\\.stack-work\\install\\724b212f\\lib\\x86_64-windows-ghc-9.4.8"
+datadir    = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\EDAN40-Assignment-1\\.stack-work\\install\\724b212f\\share\\x86_64-windows-ghc-9.4.8\\n1-0.1.0.0"
+libexecdir = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\EDAN40-Assignment-1\\.stack-work\\install\\724b212f\\libexec\\x86_64-windows-ghc-9.4.8\\n1-0.1.0.0"
+sysconfdir = "C:\\Users\\\211mar Bessi \211marsson\\HR\\\214nn 4\\FunctionalProgramming\\EDAN40-Assignment-1\\.stack-work\\install\\724b212f\\etc"
 
 getBinDir     = catchIO (getEnv "n1_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "n1_libdir")     (\_ -> return libdir)
