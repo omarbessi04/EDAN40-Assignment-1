@@ -1,5 +1,8 @@
+-- Ómar Bessi Ómarsson
+-- Veronika Juzkova
+
 module Chatterbot where
-import Utilities
+import Utilities ( map2, mmap, orElse, pick )
 import System.Random (randomIO)
 import Data.Char
 import Data.Maybe
