@@ -62,10 +62,12 @@ rulesApply :: [(Pattern String, Template String)] -> Phrase -> Phrase
  -- 2. Reflect the match.
  -- 3. Substitute the match in the target pattern.
 rulesApply list sentence = 
- case transformationsApply reflect list sentence of
+ case maybe_cool_thing of
   Nothing -> ["ARGH!"]
-  _ -> cool_thing
-  where Just cool_thing = transformationsApply reflect list sentence
+  _ -> just_cool_thing
+  where 
+    Just just_cool_thing = maybe_cool_thing
+    maybe_cool_thing = transformationsApply reflect list sentence
 
 reflect :: Phrase -> Phrase
 reflect = map (reflectWord reflections)
@@ -232,7 +234,10 @@ matchAndTransform transform pat = (mmap transform) . (match pat)
 -- Applying a single pattern
 transformationApply :: Eq a => ([a] -> [a]) -> [a] -> (Pattern a, Template a) -> Maybe [a]
 -- Empty pattern
-transformationApply given_func string (p,Pattern []) = Just []
+transformationApply given_func string (p, Pattern []) =
+  case match p string of
+    Just _  -> Just []
+    Nothing -> Nothing
 
 -- Item
 transformationApply given_func string (p,Pattern ((Item x):xs)) 
