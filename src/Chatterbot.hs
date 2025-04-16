@@ -1,6 +1,6 @@
 module Chatterbot where
 import Utilities
---import System.Random
+import System.Random (randomIO)
 import Data.Char
 import Data.Maybe
 
@@ -52,30 +52,20 @@ stateOfMind b =
 -- A rule maps a pattern to many answers, so we choose one
 -- at random, and that's our bot
 makePair :: Rule -> IO (Pattern String, Template String)
-{-makePair (Rule (pattern, list)) = (pattern, take 1 (drop r list))
-    where System.Random.getStdRandom(r, (0, length list))-}
-  {- TO BE WRITTEN -}
-makePair = undefined
-
-{-rulesApply :: [(Pattern String, Template String)] -> Phrase -> Phrase
-rulesApply list sentence = 
-  case transformationsApply id list sentence of
-    Nothing -> ["ARGH!"]
-    _ -> reflect s
-    where Just s = transformationsApply id list sentence -}
+makePair (Rule (pattern, list)) = do
+  rand_guy <- randomIO :: IO Float
+  return (pattern, pick rand_guy list)
     
 
 rulesApply :: [(Pattern String, Template String)] -> Phrase -> Phrase
  -- 1. Match the phrase with a pattern.
-rulesApply list sentence = 
- case transformationsApply id list sentence of
-  Nothing -> ["ARGH!"]
-  _ -> let cool_thing = s
- where Just s = transformationsApply id list sentence
-
  -- 2. Reflect the match.
- reflect sentence
  -- 3. Substitute the match in the target pattern.
+rulesApply list sentence = 
+ case transformationsApply reflect list sentence of
+  Nothing -> ["ARGH!"]
+  _ -> cool_thing
+  where Just cool_thing = transformationsApply reflect list sentence
 
 reflect :: Phrase -> Phrase
 reflect = map (reflectWord reflections)
@@ -122,8 +112,9 @@ rulesCompile :: [(String, [String])] -> BotBrain
 rulesCompile = map ruleCompile
 
 ruleCompile :: (String, [String]) -> Rule
-{- TO BE WRITTEN -}
-ruleCompile = undefined
+ruleCompile (wannabe_pattern, wannabe_templates) = Rule (starPattern lowered_wannabe_p, map starPattern wannabe_templates)
+  where 
+    lowered_wannabe_p = map toLower wannabe_pattern
 
 --------------------------------------
 
@@ -168,9 +159,16 @@ reduce :: Phrase -> Phrase
 reduce = reductionsApply reductions
 
 reductionsApply :: [(Pattern String, Pattern String)] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-reductionsApply = undefined
+reductionsApply pairs original  =
+  case transformationsApply id pairs original of
+    Nothing -> original
+    _ -> reductionsApply pairs (func original)
+    where 
+      func = unwrapMaybe . transformationsApply id pairs
 
+unwrapMaybe :: Maybe a -> a
+unwrapMaybe maybe = r
+  where Just r = maybe
 
 -------------------------------------------------------
 -- Match and substitute
@@ -247,7 +245,7 @@ transformationApply given_func string (p,Pattern ((Item x):xs))
 -- Wildcard    
 transformationApply given_func string (p,Pattern (Wildcard:xs)) 
   | isNothing (match p string) = Nothing
-  | otherwise = Just(replacement++s)
+  | otherwise = Just(given_func replacement++s)
   where
     (Just s) = transformationApply given_func (given_func string) (p, Pattern xs)
     Just replacement = match p string
